@@ -203,7 +203,7 @@ export class ChallengeComponent implements AfterViewInit {
     const machineOutputData = new Map<string, number>();
     this.machines.find(mach => mach === machine).data.find(data => data.name === "output").values.forEach(value => {
       let day = moment(value.timestamp).format('LL');
-      machineOutputData.has(day) ? machineOutputData.set(day, machineOutputData.get(day) + 1) : machineOutputData.set(day, 1);
+      machineOutputData.has(day) ? machineOutputData.set(day, machineOutputData.get(day) + value.value) : machineOutputData.set(day, value.value);
     })
     return {
       name: machine.label,
