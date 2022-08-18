@@ -125,7 +125,7 @@ export class ChallengeComponent implements AfterViewInit {
   get systemByEnvData(): PieData[] {
     let datas = [];
     this.challengeService.getEnvironments.forEach(env => {
-      let data: PieData = { name: env.id, value: this.challengeService.getEnvironment(env.id).systems.length };
+      let data: PieData = { name: env.name, value: this.challengeService.getEnvironment(env.id).systems.length };
       datas.push(data);
     });
     return datas;
@@ -138,7 +138,7 @@ export class ChallengeComponent implements AfterViewInit {
   get assetBySystemData(): PieData[] {
     let datas = [];
     this.systemsIdsForAssetPieChart.forEach(sys => {
-      let data :PieData = { name:sys, value:this.challengeService.getSystem(sys).recursiveAssets.length};
+      let data :PieData = { name:this.getSystemName(sys), value:this.challengeService.getSystem(sys).recursiveAssets.length};
       datas.push(data);
     });
     return datas;
@@ -158,7 +158,10 @@ export class ChallengeComponent implements AfterViewInit {
   get xAxisByDays(): string[] {
     let days = [];
     this.challengeService.timeframe.forEach(date => {
-      days.push(moment(date).format('LL'));
+      let day = moment(date).format('LL');
+      if(! days.includes(day)) {
+        days.push(day);
+      }
     });
     return days;
   }
@@ -198,10 +201,10 @@ export class ChallengeComponent implements AfterViewInit {
    */
   getSerieForMachine(machine: Asset): BarSeriesOption {
     const machineOutputData = new Map<string, number>();
-    // this.machines.find(mach => mach === machine).data.find(data => data.name === "output").values.forEach(val => console.log( moment(val.timestamp).format('LL')));
-    this.xAxisByDays.forEach(day => {
-      machineOutputData.has(day)? machineOutputData.set(day, machineOutputData.get(day) + 1) : machineOutputData.set(day, 1);
-    });
+    this.machines.find(mach => mach === machine).data.find(data => data.name === "output").values.forEach(value => {
+      let day = moment(value.timestamp).format('LL');
+      machineOutputData.has(day) ? machineOutputData.set(day, machineOutputData.get(day) + 1) : machineOutputData.set(day, 1);
+    })
     return {
       name: machine.label,
       type: 'bar',
@@ -209,7 +212,7 @@ export class ChallengeComponent implements AfterViewInit {
       label: {
         show: true
       },
-      data: Array.from(machineOutputData)
+      data: Array.from(machineOutputData.values())
     }
   }
 
