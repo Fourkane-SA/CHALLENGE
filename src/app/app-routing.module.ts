@@ -3,11 +3,13 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { DataPreviewComponent } from './pages/data-preview/data-preview.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
+import { ChallengeComponent } from './pages/challenge/challenge.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: HomePageComponent },
   { path: 'dataset', component: DataPreviewComponent },
+  { path: 'challenge', component: ChallengeComponent},
   { path: '**', redirectTo: '/home' }
 ];
 

@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { BarSeriesOption, EChartsOption, LineSeriesOption } from 'echarts';
+import { BarSeriesOption, dataTool, EChartsOption, LineSeriesOption } from 'echarts';
 import moment from 'moment';
 
 import { Asset } from '../../models/asset.model';
@@ -123,7 +123,12 @@ export class ChallengeComponent implements AfterViewInit {
    * @returns {PieData[]} sous la forme [{name, value}]
    */
   get systemByEnvData(): PieData[] {
-    return [];
+    let datas = [];
+    this.challengeService.getEnvironments.forEach(env => {
+      let data: PieData = { name: env.id, value: this.challengeService.getEnvironment(env.id).systems.length };
+      datas.push(data);
+    });
+    return datas;
   }
 
   /**
@@ -131,7 +136,12 @@ export class ChallengeComponent implements AfterViewInit {
    * @returns {PieData[]} sous la forme [{name, value}]
    */
   get assetBySystemData(): PieData[] {
-    return [];
+    let datas = [];
+    this.systemsIdsForAssetPieChart.forEach(sys => {
+      let data :PieData = { name:sys, value:this.challengeService.getSystem(sys).recursiveAssets.length};
+      datas.push(data);
+    });
+    return datas;
   }
 
   /**
@@ -146,7 +156,11 @@ export class ChallengeComponent implements AfterViewInit {
    * tip: utiliser moment(hour).format('LL') pour récupérer le jour pour une heure donnée
    */
   get xAxisByDays(): string[] {
-    return [];
+    let days = [];
+    this.challengeService.timeframe.forEach(date => {
+      days.push(moment(date).format('LL'));
+    });
+    return days;
   }
 
   /**
@@ -172,8 +186,9 @@ export class ChallengeComponent implements AfterViewInit {
       .map(asset => ({
         name: asset.label,
         type: 'line',
-        data: []
-      }));
+        data: asset.data.find(elem => elem.name === "temperature").values
+      }
+      ));
   }
 
   /**
@@ -183,6 +198,10 @@ export class ChallengeComponent implements AfterViewInit {
    */
   getSerieForMachine(machine: Asset): BarSeriesOption {
     const machineOutputData = new Map<string, number>();
+    // this.machines.find(mach => mach === machine).data.find(data => data.name === "output").values.forEach(val => console.log( moment(val.timestamp).format('LL')));
+    this.xAxisByDays.forEach(day => {
+      machineOutputData.has(day)? machineOutputData.set(day, machineOutputData.get(day) + 1) : machineOutputData.set(day, 1);
+    });
     return {
       name: machine.label,
       type: 'bar',
@@ -190,7 +209,7 @@ export class ChallengeComponent implements AfterViewInit {
       label: {
         show: true
       },
-      data: Array.from(machineOutputData.values())
+      data: Array.from(machineOutputData)
     }
   }
 
